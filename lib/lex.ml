@@ -98,6 +98,8 @@ let id_to_tk (kw: string) =
   | "extern" -> Token.Extern
   | "for" -> Token.For
   | "as" -> Token.As
+  | "true" -> Token.True
+  | "false" -> Token.False
   | ident -> Token.Ident ident
 
 (* parses string *)

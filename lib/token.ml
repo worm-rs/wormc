@@ -8,12 +8,15 @@ type kind =
   | Eq | Eq2 | BangEq | Gt | Lt | Ge | Le
   | Bang | Amp | Amp2 | Bar | Bar2
   | Type | Let | Fn | Extern | Struct | Enum
-  | If | Else | Use | For | As
+  | If | Else | Use | For | As | True | False
   | Lbrace | Rbrace | Lparen | Rparen
   | Comma | Dot | Wildcard
 
 (* represents token *)
-type t = kind Common.located
+type t = {
+  kind: kind;
+  span: Common.span
+}
 
 (* converts token kind to string *)
 let string_of_kind (kind: kind) = match kind with
@@ -56,9 +59,11 @@ let string_of_kind (kind: kind) = match kind with
   | Comma -> "Comma"
   | Dot -> "Dot"
   | Wildcard -> "Wildcard"
+  | True -> "True"
+  | False -> "False"
 
 (* converts token to string *)
-let string_of_tok (tk : t) = "(" ^ string_of_kind tk.value ^ ", " ^ Common.string_of_span tk.span ^ ")"
+let string_of_tok (tk : t) = "(" ^ string_of_kind tk.kind ^ ", " ^ Common.string_of_span tk.span ^ ")"
 
 (* prints token list *)
 let print_tks tokens =
