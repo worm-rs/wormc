@@ -101,7 +101,7 @@ let id_to_tk (kw: string) =
   | ident -> Token.Ident ident
 
 (* parses string *)
-let lex_string (lx: lexer) : Token.t =
+let lex_string (lx: lexer) : Token.kind =
   (* skip opening quote *)
   bump lx;
 
@@ -123,7 +123,7 @@ let lex_string (lx: lexer) : Token.t =
   Token.String (Buffer.contents buf)
 
 (* parses number *)
-let lex_number (lx: lexer) : Token.t =
+let lex_number (lx: lexer) : Token.kind =
   let buf = Buffer.create 8 in
   let is_done = ref false in
   let is_float = ref false in
@@ -147,7 +147,7 @@ let lex_number (lx: lexer) : Token.t =
   else Token.Float (float_of_string (Buffer.contents buf))
 
 (* parses id *)
-let lex_id (lx: lexer) : Token.t =
+let lex_id (lx: lexer) : Token.kind =
   let buf = Buffer.create 16 in
   let is_done = ref false in
 
@@ -167,8 +167,12 @@ let lex_id (lx: lexer) : Token.t =
 
 (* retrieves next token *)
 let next_token (lx: lexer) : Token.t option =
+  (* skipping trivia *)
   skip_trivia lx;
-  match peek lx, next lx with
+  let span_start = lx.pos in
+
+  (* parsing token kind *)
+  let kind = match peek lx, next lx with
   | Some '>', Some '=' -> bump2 lx; Some Token.Ge
   | Some '<', Some '=' -> bump2 lx; Some Token.Le
   | Some '=', Some '=' -> bump2 lx; Some Token.Eq2
@@ -194,7 +198,13 @@ let next_token (lx: lexer) : Token.t option =
   | Some '"', _ -> Some (lex_string lx)
   | _ when is_number lx -> Some (lex_number lx)
   | _ when is_id lx -> Some(lex_id lx)
-  | _, _ -> None
+  | _, _ -> None in
+  let span_end = lx.pos in
+
+  (* forming token *)
+  match kind with
+  | Some kind -> Some { value = kind; span = {start_pos = span_start; end_pos = span_end} }
+  | None -> None
 
 (* performs lexing of all the buffer *)
 let rec lex_all lx =

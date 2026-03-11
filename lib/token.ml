@@ -1,5 +1,5 @@
-(* represents token of the source code *)
-type t =
+(* represents token kind *)
+type kind =
   | Int of int
   | Float of float
   | Ident of string
@@ -12,8 +12,11 @@ type t =
   | Lbrace | Rbrace | Lparen | Rparen
   | Comma | Dot | Wildcard
 
-(* converts token to string *)
-let string_of_tk = function
+(* represents token *)
+type t = kind Common.located
+
+(* converts token kind to string *)
+let string_of_kind (kind: kind) = match kind with
   | Int n -> "Int(" ^ string_of_int n ^ ")"
   | Float f -> "Float(" ^ string_of_float f ^ ")"
   | Ident s -> "Ident(" ^ s ^ ")"
@@ -54,6 +57,9 @@ let string_of_tk = function
   | Dot -> "Dot"
   | Wildcard -> "Wildcard"
 
+(* converts token to string *)
+let string_of_tok (tk : t) = "(" ^ string_of_kind tk.value ^ ", " ^ Common.string_of_span tk.span ^ ")"
+
 (* prints token list *)
 let print_tks tokens =
   print_string "tokens (";
@@ -61,5 +67,5 @@ let print_tks tokens =
   print_endline "): ";
 
   List.iter (fun tk ->
-    print_endline (string_of_tk tk)
+    print_endline (string_of_tok tk)
   ) tokens
