@@ -1,2 +1,3 @@
 (library
- (name worm))
+ (name worm)
+ (libraries grace))

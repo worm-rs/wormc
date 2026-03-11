@@ -1,28 +1,27 @@
 (* defines lexer structure *)
 type lexer = {
   (* source code we lexing *)
-  src: string;
+  text: string;
+
+  (* source used for error reporting *)
+  source: Grace.Source.t ref;
+
   (* position *)
   mutable pos: int;
 }
 
-(* defines lexer error *)
-type lexer_error =
-  | Unterminated_comment of int * int
-  | Unexpected_char of char * int * int
-
 (* creates new lexer *)
-let create (src : string) : lexer = { src; pos = 0 }
+let create (text : string) (source : Grace.Source.t ref) : lexer = { text; source; pos = 0 }
 
 (* peeks current char *)
 let peek (lx : lexer) : char option =
-  if lx.pos >= String.length lx.src then None
-  else Some(lx.src.[lx.pos])
+  if lx.pos >= String.length lx.text then None
+  else Some(lx.text.[lx.pos])
 
 (* peeks next char *)
 let next (lx : lexer) : char option =
-  if lx.pos + 1 >= String.length lx.src then None
-  else Some(lx.src.[lx.pos + 1])
+  if lx.pos + 1 >= String.length lx.text then None
+  else Some(lx.text.[lx.pos + 1])
 
 (* bumps char by adding 1 to pos *)
 let bump (lx : lexer) =
@@ -205,7 +204,7 @@ let next_token (lx: lexer) : Token.t option =
 
   (* forming token *)
   match kind with
-  | Some kind -> Some { value = kind; span = {start_pos = span_start; end_pos = span_end} }
+  | Some kind -> Some { kind; span = {start_pos = span_start; end_pos = span_end} }
   | None -> None
 
 (* performs lexing of all the buffer *)
