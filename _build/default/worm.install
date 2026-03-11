@@ -1,8 +1,0 @@
-lib: [
-  "_build/install/default/lib/worm/META"
-  "_build/install/default/lib/worm/dune-package"
-  "_build/install/default/lib/worm/opam"
-]
-bin: [
-  "_build/install/default/bin/worm"
-]

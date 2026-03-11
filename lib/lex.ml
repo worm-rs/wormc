@@ -22,7 +22,7 @@ let peek (lx : lexer) : char option =
 (* peeks next char *)
 let next (lx : lexer) : char option =
   if lx.pos + 1 >= String.length lx.src then None
-  else Some(lx.src.[lx.pos])
+  else Some(lx.src.[lx.pos + 1])
 
 (* bumps char by adding 1 to pos *)
 let bump (lx : lexer) =
@@ -32,11 +32,25 @@ let bump (lx : lexer) =
 let bump2 (lx : lexer) =
   lx.pos <- lx.pos + 2
 
-(* checks current char iswhitespace *)
+(* checks current char is whitespace *)
 let is_whitespace (lx : lexer) : bool =
   match peek lx with
   | Some '\n' | Some '\t' | Some ' ' -> true
   | _ -> false
+
+(* checks current char is number *)
+let is_number (lx : lexer) : bool =
+  let ch = peek lx in
+  match ch with
+  | Some ch -> Char.Ascii.is_digit ch
+  | None -> false
+
+(* checks current char is number *)
+let is_id (lx : lexer) : bool =
+  let ch = peek lx in
+  match ch with
+  | Some ch -> Char.Ascii.is_letter ch || ch == '_'
+  | None -> false
 
 (* skips comment *)
 let skip_comment (lx : lexer) =
@@ -86,8 +100,104 @@ let id_to_tk (kw: string) =
   | "as" -> Token.As
   | ident -> Token.Ident ident
 
+(* parses string *)
+let lex_string (lx: lexer) : Token.t =
+  (* skip opening quote *)
+  bump lx;
+
+  let buf = Buffer.create 16 in
+  let is_done = ref false in
+
+  while not !is_done do
+    match peek lx with
+    | Some '"' ->
+        bump lx; (* closing quote *)
+        is_done := true
+    | Some c ->
+        Buffer.add_char buf c;
+        bump lx
+    | None ->
+        failwith "Unterminated string"
+  done;
+
+  Token.String (Buffer.contents buf)
+
+(* parses number *)
+let lex_number (lx: lexer) : Token.t =
+  let buf = Buffer.create 8 in
+  let is_done = ref false in
+  let is_float = ref false in
+
+  while not !is_done do
+    match peek lx with
+    | Some c when is_number lx ->
+      Buffer.add_char buf c;
+      bump lx;
+    | Some '.' when not !is_float ->
+      Buffer.add_char buf '.';
+      bump lx;
+      is_float := true;
+    | Some '.' when !is_float ->
+      failwith "invalid float"
+    | _ ->
+      is_done := true
+  done;
+
+  if not !is_float then Token.Int (int_of_string (Buffer.contents buf))
+  else Token.Float (float_of_string (Buffer.contents buf))
+
+(* parses id *)
+let lex_id (lx: lexer) : Token.t =
+  let buf = Buffer.create 16 in
+  let is_done = ref false in
+
+  while not !is_done do
+    match peek lx with
+    | Some c when is_id lx ->
+      Buffer.add_char buf c;
+      bump lx;
+    | Some c when is_number lx ->
+      Buffer.add_char buf c;
+      bump lx;
+    | _ ->
+      is_done := true
+  done;
+
+  id_to_tk (Buffer.contents buf)
+
+(* retrieves next token *)
 let next_token (lx: lexer) : Token.t option =
   skip_trivia lx;
   match peek lx, next lx with
-  | Some '>', Some '=' -> ( bump2; Some Token.Ge )
-  | Some '<', Some '=' -> 
+  | Some '>', Some '=' -> bump2 lx; Some Token.Ge
+  | Some '<', Some '=' -> bump2 lx; Some Token.Le
+  | Some '=', Some '=' -> bump2 lx; Some Token.Eq2
+  | Some '!', Some '=' -> bump2 lx; Some Token.BangEq
+  | Some '|', Some '|' -> bump2 lx; Some Token.Bar2
+  | Some '>', _ -> bump lx; Some Token.Gt
+  | Some '<', _ -> bump lx; Some Token.Lt
+  | Some '=', _ -> bump lx; Some Token.Eq
+  | Some '!', _ -> bump lx; Some Token.Bang
+  | Some '|', _ -> bump lx; Some Token.Bar
+  | Some '(', _ -> bump lx; Some Token.Lparen
+  | Some ')', _ -> bump lx; Some Token.Rparen
+  | Some '{', _ -> bump lx; Some Token.Lbrace
+  | Some '}', _ -> bump lx; Some Token.Rbrace
+  | Some '+', _ -> bump lx; Some Token.Plus
+  | Some '-', _ -> bump lx; Some Token.Minus
+  | Some '*', _ -> bump lx; Some Token.Star
+  | Some '/', _ -> bump lx; Some Token.Slash
+  | Some '%', _ -> bump lx; Some Token.Percent
+  | Some ',', _ -> bump lx; Some Token.Comma
+  | Some '.', _ -> bump lx; Some Token.Dot
+  | Some '_', _ -> bump lx; Some Token.Wildcard
+  | Some '"', _ -> Some (lex_string lx)
+  | _ when is_number lx -> Some (lex_number lx)
+  | _ when is_id lx -> Some(lex_id lx)
+  | _, _ -> None
+
+(* performs lexing of all the buffer *)
+let rec lex_all lx =
+  match next_token lx with
+  | Some tk -> tk :: lex_all lx
+  | None -> []
