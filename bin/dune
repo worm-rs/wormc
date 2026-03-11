@@ -1,0 +1,4 @@
+(executable
+ (public_name worm)
+ (name main)
+ (libraries worm))

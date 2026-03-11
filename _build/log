@@ -1,0 +1,26 @@
+# dune build
+# OCAMLPARAM: unset
+# Shared cache: enabled-except-user-rules
+# Shared cache location: /home/vyacheslav/.cache/dune/db
+# Workspace root: /home/vyacheslav/bookworm/worm
+# Auto-detected concurrency: 12
+# Dune context:
+#  { name = "default"
+#  ; kind = "default"
+#  ; profile = Dev
+#  ; merlin = true
+#  ; fdo_target_exe = None
+#  ; build_dir = In_build_dir "default"
+#  ; instrument_with = []
+#  }
+$ /home/vyacheslav/.opam/default/bin/ocamlc.opt -config > /tmp/dune_b46b2e_output
+$ (cd _build/default && /home/vyacheslav/.opam/default/bin/ocamldep.opt -modules -impl lib/token.ml) > _build/default/lib/.worm.objs/worm__Token.impl.d
+$ (cd _build/default && /home/vyacheslav/.opam/default/bin/ocamldep.opt -modules -impl lib/lex.ml) > _build/default/lib/.worm.objs/worm__Lex.impl.d
+$ (cd _build/default && /home/vyacheslav/.opam/default/bin/ocamlc.opt -short-paths -keep-locs -warn-error +a -g -bin-annot -bin-annot-occurrences -I lib/.worm.objs/byte -no-alias-deps -opaque -open Worm -o lib/.worm.objs/byte/worm__Token.cmo -c -impl lib/token.ml)
+$ (cd _build/default && /home/vyacheslav/.opam/default/bin/ocamlc.opt -short-paths -keep-locs -warn-error +a -g -bin-annot -bin-annot-occurrences -I lib/.worm.objs/byte -no-alias-deps -opaque -open Worm -o lib/.worm.objs/byte/worm__Lex.cmo -c -impl lib/lex.ml)
+> File "lib/lex.ml", line 38, characters 4-9:
+> 38 |   | "use" -> Token.Use
+>          ^^^^^
+> Error (warning 11 [redundant-case]): this match case is unused.
+[2]
+$ (cd _build/default && /home/vyacheslav/.opam/default/bin/ocamlopt.opt -short-paths -keep-locs -warn-error +a -g -I lib/.worm.objs/byte -I lib/.worm.objs/native -cmi-file lib/.worm.objs/byte/worm__Token.cmi -no-alias-deps -opaque -open Worm -o lib/.worm.objs/native/worm__Token.cmx -c -impl lib/token.ml)
