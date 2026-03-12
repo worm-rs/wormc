@@ -29,7 +29,7 @@ type un_op =
 (* represents type hint *)
 and hint = {
   kind: hint_kind;
-  span: Common.span;
+  span: Span.t;
 }
 
 (* represents type hint kind *)
@@ -48,27 +48,27 @@ type visibility =
 type field = {
   name: string;
   hint: hint;
-  span: Common.span
+  span: Span.t
 }
 
 (* represents enum variant *)
 type variant = {
   name: string;
   fields: hint list;
-  span: Common.span;
+  span: Span.t;
 }
 
 (* represents function parameter *)
 type param = {
   name: string;
   hint: hint;
-  span: Common.span
+  span: Span.t
 }
 
 (* represents item *)
 and item = {
   kind: item_kind;
-  span: Common.span;
+  span: Span.t;
 }
 
 (* represents item kind *)
@@ -85,7 +85,7 @@ and item_kind =
 (* represents statement *)
 and stmt = {
   kind: stmt_kind;
-  span: Common.span;
+  span: Span.t;
 }
 
 (* represents statement kind *)
@@ -97,7 +97,7 @@ and stmt_kind =
 (* represents pattern *)
 and pat = {
   kind: pat_kind;
-  span: Common.span;
+  span: Span.t;
 }
 
 (* represents pattern kind *)
@@ -114,13 +114,13 @@ and pat_kind =
 and case = {
   pats: pat list;
   body: stmt list;
-  span: Common.span
+  span: Span.t
 }
 
 (* represents expression *)
 and expr = {
   kind: expr_kind;
-  span: Common.span
+  span: Span.t
 }
 
 (* represents expression kind *)

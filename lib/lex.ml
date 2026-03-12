@@ -54,6 +54,7 @@ let is_id (lx : lexer) : bool =
 (* skips comment *)
 let skip_comment (lx : lexer) =
   (* bumping `(` and `*` *)
+  let start = lx.pos in
   bump2 lx;
 
   let done_ = ref false in
@@ -63,7 +64,23 @@ let skip_comment (lx : lexer) =
         bump2 lx; (* `*` and `)` *)
         done_ := true
     | None, _ ->
-        failwith "Unterminated comment"
+      Report.report
+        (Report.diag
+          ~notes:[]
+          ~code: 1
+          ~msg: (Grace.Diagnostic.Message.of_string "unterminated comment")
+          ~severity: Grace.Diagnostic.Severity.Error
+          ~labels: [
+            Grace.Diagnostic.Label.create
+              ~range: (Report.span_to_range
+                lx.source
+                (Span.create
+                  ~start_pos: start
+                  ~end_pos: lx.pos)
+              )
+              ~priority: Grace.Diagnostic.Priority.Primary
+              (Grace.Diagnostic.Message.of_string "here")
+          ])
     | _,  _ ->
         bump lx
   done
@@ -104,6 +121,7 @@ let id_to_tk (kw: string) =
 (* parses string *)
 let lex_string (lx: lexer) : Token.kind =
   (* skip opening quote *)
+  let start = lx.pos in
   bump lx;
 
   let buf = Buffer.create 16 in
@@ -118,13 +136,30 @@ let lex_string (lx: lexer) : Token.kind =
         Buffer.add_char buf c;
         bump lx
     | None ->
-        failwith "Unterminated string"
+      Report.report
+        (Report.diag
+          ~notes:[]
+          ~code: 2
+          ~msg: (Grace.Diagnostic.Message.of_string "untermianted string")
+          ~severity: Grace.Diagnostic.Severity.Error
+          ~labels: [
+            Grace.Diagnostic.Label.create
+              ~range: (Report.span_to_range
+                lx.source
+                (Span.create
+                  ~start_pos: start
+                  ~end_pos: lx.pos)
+              )
+              ~priority: Grace.Diagnostic.Priority.Primary
+              (Grace.Diagnostic.Message.of_string "here")
+          ])
   done;
 
   Token.String (Buffer.contents buf)
 
 (* parses number *)
 let lex_number (lx: lexer) : Token.kind =
+  let start = lx.pos in
   let buf = Buffer.create 8 in
   let is_done = ref false in
   let is_float = ref false in
@@ -139,7 +174,23 @@ let lex_number (lx: lexer) : Token.kind =
       bump lx;
       is_float := true;
     | Some '.' when !is_float ->
-      failwith "invalid float"
+      Report.report
+        (Report.diag
+          ~notes:[]
+          ~code: 1
+          ~msg: (Grace.Diagnostic.Message.of_string "invalid float")
+          ~severity: Grace.Diagnostic.Severity.Error
+          ~labels: [
+            Grace.Diagnostic.Label.create
+              ~range: (Report.span_to_range
+                lx.source
+                (Span.create
+                  ~start_pos: start
+                  ~end_pos: lx.pos)
+              )
+              ~priority: Grace.Diagnostic.Priority.Primary
+              (Grace.Diagnostic.Message.of_string "here")
+          ])
     | _ ->
       is_done := true
   done;

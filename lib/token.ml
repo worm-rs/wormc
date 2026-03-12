@@ -15,7 +15,7 @@ type kind =
 (* represents token *)
 type t = {
   kind: kind;
-  span: Common.span
+  span: Span.t
 }
 
 (* converts token kind to string *)
@@ -63,7 +63,7 @@ let string_of_kind (kind: kind) = match kind with
   | False -> "False"
 
 (* converts token to string *)
-let string_of_tok (tk : t) = "(" ^ string_of_kind tk.kind ^ ", " ^ Common.string_of_span tk.span ^ ")"
+let string_of_tok (tk : t) = "(" ^ string_of_kind tk.kind ^ ", " ^ Span.string_of_span tk.span ^ ")"
 
 (* prints token list *)
 let print_tks tokens =
