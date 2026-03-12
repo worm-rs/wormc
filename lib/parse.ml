@@ -14,9 +14,10 @@ type parser = {
 }
 
 (* creates new parser *)
-let create (lx : Lex.lexer) (source : Grace.Source.t ref) : parser = {
-  lx; source; current = Lex.next_token lx; next = Lex.next_token lx
-}
+let create (lx : Lex.lexer) (source : Grace.Source.t ref) : parser =
+  let current = Lex.next_token lx in
+  let next = Lex.next_token lx in
+  { lx; source; current; next }
 
 (* reports end of file *)
 let eof () = Report.report
@@ -83,8 +84,7 @@ let bump (ps: parser) =
 let check (ps: parser) (kind: Token.kind) : bool =
   match ps.current with
   | Some tok when tok.kind = kind -> true
-  | Some _ -> false
-  | None -> eof ()
+  | _ -> false
 
 (* peeks token *)
 let peek (ps: parser) : Token.t =
@@ -97,7 +97,7 @@ let atom_expr (ps: parser) : Ast.expr =
   match ps.current with
   | Some tok ->
       (match tok.kind with
-      | Token.Int i -> { span = tok.span; kind = Ast.Lit (Ast.Int i) }
+      | Token.Int i -> bump ps; { span = tok.span; kind = Ast.Lit (Ast.Int i) }
       | _ -> unexpected_expr_tok ps tok.span)
   | None -> eof ()
 
@@ -121,7 +121,7 @@ let unary_expr (ps: parser) : Ast.expr =
       kind = Ast.Unary (op, expr)
     }
   else
-  atom_expr ps
+    atom_expr ps
 
 (*parses factor expression *)
 let factor_expr (ps: parser) : Ast.expr =

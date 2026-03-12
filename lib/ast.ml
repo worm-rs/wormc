@@ -39,7 +39,7 @@ and hint = {
 and hint_kind =
   | Local of string
   | Module of string * string
-  | Fn of hint * hint list
+  | Sig of hint * hint list
   | Unit
 
 (* represents visibility *)
