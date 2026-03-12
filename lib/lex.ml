@@ -48,7 +48,7 @@ let is_number (lx : lexer) : bool =
 let is_id (lx : lexer) : bool =
   let ch = peek lx in
   match ch with
-  | Some ch -> Char.Ascii.is_letter ch || ch == '_'
+  | Some ch -> Char.Ascii.is_letter ch || ch = '_'
   | None -> false
 
 (* skips comment *)
@@ -67,7 +67,7 @@ let skip_comment (lx : lexer) =
       Report.report
         (Report.diag
           ~notes:[]
-          ~code: 1
+          ~code: 3
           ~msg: (Grace.Diagnostic.Message.of_string "unterminated comment")
           ~severity: Grace.Diagnostic.Severity.Error
           ~labels: [
@@ -247,6 +247,7 @@ let next_token (lx: lexer) : Token.t option =
   | Some ',', _ -> bump lx; Some Token.Comma
   | Some '.', _ -> bump lx; Some Token.Dot
   | Some '_', _ -> bump lx; Some Token.Wildcard
+  | Some '^', _ -> bump lx; Some Token.Caret
   | Some '"', _ -> Some (lex_string lx)
   | _ when is_number lx -> Some (lex_number lx)
   | _ when is_id lx -> Some(lex_id lx)

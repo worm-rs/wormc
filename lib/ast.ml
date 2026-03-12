@@ -10,12 +10,15 @@ type bin_op =
   | Add
   | Sub
   | Mul
-  | Slash
+  | Div
   | Mod
   | And
   | Or
+  | BitAnd
+  | BitOr
+  | Xor
   | Eq
-  | Neq
+  | Ne
   | Ge
   | Le
   | Gt
@@ -102,13 +105,13 @@ and pat = {
 
 (* represents pattern kind *)
 and pat_kind =
-  | Int of int
-  | Float of float
-  | String of string
-  | Bool of bool
-  | Unpack of expr * string list
-  | Variant of expr
-  | Or of pat * pat
+  | PInt of int
+  | PFloat of float
+  | PString of string
+  | PBool of bool
+  | PUnpack of expr * string list
+  | PVariant of expr
+  | POr of pat * pat
 
 (* represents single match case*)
 and case = {

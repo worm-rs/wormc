@@ -10,7 +10,7 @@ type kind =
   | Type | Let | Fn | Extern | Struct | Enum
   | If | Else | Use | For | As | True | False
   | Lbrace | Rbrace | Lparen | Rparen
-  | Comma | Dot | Wildcard
+  | Comma | Dot | Wildcard | Caret
 
 (* represents token *)
 type t = {
@@ -61,6 +61,7 @@ let string_of_kind (kind: kind) = match kind with
   | Wildcard -> "Wildcard"
   | True -> "True"
   | False -> "False"
+  | Caret -> "Caret"
 
 (* converts token to string *)
 let string_of_tok (tk : t) = "(" ^ string_of_kind tk.kind ^ ", " ^ Span.string_of_span tk.span ^ ")"
